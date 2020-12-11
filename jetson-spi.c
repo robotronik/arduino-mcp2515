@@ -76,6 +76,21 @@ int spi_receive(int fd, uint8_t *data){
   return 0;
 }
 
+int spi_full_duplex(int fd, uint8_t *data, uint8_t *dati, int len){
+
+    struct spi_ioc_transfer tr = {
+            .tx_buf = (unsigned long)data,
+            .rx_buf = (unsigned long)dati,
+            .len = len,
+            .speed_hz = SPEED,
+            .bits_per_word = BITS,
+    };
+
+    int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+    if(ret<0) return error("Error receiving message");
+    return 0;
+}
+
 void spi_close(int fd){
   close(fd);
 }
@@ -94,11 +109,9 @@ int main(){
 		0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
 		0xF0, 0x0D,
 	};
-  err = spi_send(fd, data, 32);
-  if(err==1) printf("spi send error");
 
-  uint8_t *dati = calloc(32,sizeof(uint8_t));
-  err = spi_receive(fd, dati);
+  uint8_t *dati = calloc(RX_SIZE,sizeof(uint8_t));
+  err = spi_full_duplex(fd, data, dati, RX_SIZE);
   if(err==1) printf("spi receive error");
   for(int i=0;i<(int)RX_SIZE;i++){
     printf("%.2X ",dati[i]);
