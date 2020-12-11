@@ -64,8 +64,6 @@ int spi_send(int fd, uint8_t *data, int len){
 
 int spi_receive(int fd, uint8_t *data){
 
-  data = calloc(RX_SIZE,sizeof(uint8_t));
-
   struct spi_ioc_transfer tr = {
     .rx_buf = (unsigned long)data,
 		.len = RX_SIZE,
@@ -80,4 +78,30 @@ int spi_receive(int fd, uint8_t *data){
 
 void spi_close(int fd){
   close(fd);
+}
+
+
+int main(){
+  int err;
+  int fd = spi_init();
+
+	uint8_t data[] = {
+		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+		0x40, 0x00, 0x00, 0x00, 0x00, 0x95,
+		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+		0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
+		0xF0, 0x0D,
+	};
+  err = spi_send(fd, data, 32);
+  if(err==1) printf("spi send error");
+
+  uint8_t *dati = calloc(32,sizeof(uint8_t));
+  err = spi_receive(fd, dati);
+  if(err==1) printf("spi receive error");
+  for(int i=0;i<(int)RX_SIZE;i++){
+    printf("%X\n",dati[i]);
+  }
+  return 0;
 }
