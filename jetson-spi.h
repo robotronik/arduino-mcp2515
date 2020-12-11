@@ -5,25 +5,19 @@
  */
 
 #include <stdint.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
 
+#define RX_SIZE 32
+#define SPEED 500000
+#define BITS 8
 
-typedef enum{SEND,RECEIVE} direction;
-
-typedef struct{
-  direction rt;
-  uint8_t spi_mode;
-  uint32_t * data;
-  uint32_t len;
-  uint32_t verbose;
-} state_t;
-
-
-int spi_init();                      //TODO
-int spi_close();                     //TODO
-int spi_send( uint8_t* );            //TODO
-int spi_receive();                   //TODO
-void print_and_abort(char *);        //TODO
+int spi_init();
+void spi_close(int);                     //TODO
+int spi_send(int fd, uint8_t * data, int len);             //TODO
+int spi_receive(int fd,uint8_t * data);          //TODO
+int error(char * err);        //TODO

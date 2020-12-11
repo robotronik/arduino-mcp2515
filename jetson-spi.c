@@ -6,7 +6,7 @@
 #include "jetson-spi.h"
 
 
-int main(int argc, char *argv[]){
+int spi_init(){
 
   /*
    * Initialisation
@@ -18,47 +18,62 @@ int main(int argc, char *argv[]){
   uint8_t bits = 8;
   uint32_t speed = 500000;
 
-  //reading arguments
-  state_t state;
-  state = init(argc,argv);
-
   //opening SPI device
   file_descriptor = open(device, O_RDWR);
-  if(file_descriptor<0){
-    print_and_abort("Device cannot be opened.");
-  }
+  if(file_descriptor<0) return error("Device cannot be opened.");
 
   /*
    * Writing, then fetching, spi parameters
    */
 
-  //Spi Mode
-	ret = ioctl(file_descriptor, SPI_IOC_WR_MODE, &(state.spi_mode));
-	if (ret == -1) print_and_abort("can't set spi mode");
-
-	ret = ioctl(file_descriptor, SPI_IOC_RD_MODE, &(state.spi_mode));
-	if (ret == -1) print_and_abort("can't get spi mode");
-
   //Number of bits per word
 	ret = ioctl(file_descriptor, SPI_IOC_WR_BITS_PER_WORD, &bits);
-	if (ret == -1) print_and_abort("can't set bits per word");
+	if (ret == -1) return error("can't set bits per word");
 
 	ret = ioctl(file_descriptor, SPI_IOC_RD_BITS_PER_WORD, &bits);
-	if (ret == -1) print_and_abort("can't get bits per word");
+	if (ret == -1) return error("can't get bits per word");
   
   //Max frequency
  	ret = ioctl(file_descriptor, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
-	if (ret == -1) print_and_abort("can't set max speed hz");
+	if (ret == -1) return error("can't set max speed hz");
 
 	ret = ioctl(file_descriptor, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
-	if (ret == -1) print_and_abort("can't get max speed hz");
+	if (ret == -1) return error("can't get max speed hz");
 
-  //Printing state if verbosity is on
-  if(state.verbose != 0){
-    printf("spi mode: %d\n", state.spi_mode);
-    printf("direction: %s\n", state.rt?"SEND":"RECEIVE");
-    printf("bits per word: %d\n", bits);
-    printf("max speed: %d Hz (%d KHz)\n", speed, speed/1000);
-  }
+  return file_descriptor;
+}
 
+int error(char *err){
+  printf("%s",err);
+  return 1;
+}
+
+int spi_send(int fd, uint8_t *data, int len){
+
+  struct spi_ioc_transfer tr = {
+		.tx_buf = (unsigned long)data,
+		.len = len,
+		.speed_hz = SPEED,
+		.bits_per_word = BITS,
+	};
+
+  int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+  if(ret<0) return error("Error sending SPI message");
+  return 0;
+}
+
+int spi_receive(int fd, uint8_t *data){
+
+  calloc(RX_SIZE,sizeof(uint8_t));
+
+  struct spi_ioc_transfer tr = {
+    .rx_buf = (unsigned long)data,
+		.len = RX_SIZE,
+		.speed_hz = SPEED,
+		.bits_per_word = BITS,
+	};
+
+  int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+  if(ret<0) return error("Error receiving message");
+  return 0;
 }
