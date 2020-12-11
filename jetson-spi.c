@@ -15,8 +15,8 @@ int spi_init(){
   int file_descriptor;
   int ret;
   const char *device = "/dev/spidev0.0";
-  uint8_t bits = 8;
-  uint32_t speed = 500000;
+  uint8_t bits = BITS;
+  uint32_t speed = SPEED;
 
   //opening SPI device
   file_descriptor = open(device, O_RDWR);
@@ -64,7 +64,7 @@ int spi_send(int fd, uint8_t *data, int len){
 
 int spi_receive(int fd, uint8_t *data){
 
-  calloc(RX_SIZE,sizeof(uint8_t));
+  data = calloc(RX_SIZE,sizeof(uint8_t));
 
   struct spi_ioc_transfer tr = {
     .rx_buf = (unsigned long)data,
@@ -76,4 +76,8 @@ int spi_receive(int fd, uint8_t *data){
   int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
   if(ret<0) return error("Error receiving message");
   return 0;
+}
+
+void spi_close(int fd){
+  close(fd);
 }
