@@ -103,5 +103,7 @@ int main(){
   for(int i=0;i<(int)RX_SIZE;i++){
     printf("%X\n",dati[i]);
   }
+  free(dati);
+  spi_close(fd);
   return 0;
 }
