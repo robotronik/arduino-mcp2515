@@ -101,7 +101,7 @@ int main(){
   err = spi_receive(fd, dati);
   if(err==1) printf("spi receive error");
   for(int i=0;i<(int)RX_SIZE;i++){
-    printf("%X\n",dati[i]);
+    printf("%.2X ",dati[i]);
   }
   free(dati);
   spi_close(fd);
