@@ -20,4 +20,5 @@ int spi_init();
 void spi_close(int);                     //TODO
 int spi_send(int fd, uint8_t * data, int len);             //TODO
 int spi_receive(int fd,uint8_t * data);          //TODO
+int spi_full_duplex(int fd,uint8_t * data, uint8_t * dati, int len);          //TODO
 int error(char * err);        //TODO
