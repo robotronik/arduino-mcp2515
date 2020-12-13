@@ -103,6 +103,7 @@ int main(){
   for(int i=0;i<(int)RX_SIZE;i++){
     printf("%.2X ",dati[i]);
   }
+  printf("\n");
   free(dati);
   spi_close(fd);
   return 0;
