@@ -6,6 +6,11 @@
 #include "jetson-spi.h"
 
 
+/*
+ * Initialise the SPI parameters to what is specified in jetson-spi.h. Returns a
+ * file descriptor pointing to the SPI device that was opened. Remeber to close it.
+ */
+
 int spi_init(){
 
   /*
@@ -27,18 +32,18 @@ int spi_init(){
    */
 
   //Number of bits per word
-	ret = ioctl(file_descriptor, SPI_IOC_WR_BITS_PER_WORD, &bits);
-	if (ret == -1) return error("can't set bits per word");
+  ret = ioctl(file_descriptor, SPI_IOC_WR_BITS_PER_WORD, &bits);
+  if (ret == -1) return error("can't set bits per word");
 
-	ret = ioctl(file_descriptor, SPI_IOC_RD_BITS_PER_WORD, &bits);
-	if (ret == -1) return error("can't get bits per word");
-  
+  ret = ioctl(file_descriptor, SPI_IOC_RD_BITS_PER_WORD, &bits);
+  if (ret == -1) return error("can't get bits per word");
+
   //Max frequency
- 	ret = ioctl(file_descriptor, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
-	if (ret == -1) return error("can't set max speed hz");
+   ret = ioctl(file_descriptor, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
+  if (ret == -1) return error("can't set max speed hz");
 
-	ret = ioctl(file_descriptor, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
-	if (ret == -1) return error("can't get max speed hz");
+  ret = ioctl(file_descriptor, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
+  if (ret == -1) return error("can't get max speed hz");
 
   return file_descriptor;
 }
@@ -48,67 +53,89 @@ int error(char *err){
   return 1;
 }
 
+/*
+ * Sends a SPI packet without reading the response.
+ * Parameters: fd: The file descriptor opened with spi_init(),
+ * data: an array of uint8_t to be transmitted over spi.
+ * len: the lenght of the provided data array.
+ * returns 1 if something went wrong
+ */
+
 int spi_send(int fd, uint8_t *data, int len){
 
   struct spi_ioc_transfer tr = {
-		.tx_buf = (unsigned long)data,
-		.len = len,
-		.speed_hz = SPEED,
-		.bits_per_word = BITS,
-	};
+    .tx_buf = (unsigned long)data,
+    .len = len,
+    .speed_hz = SPEED,
+    .bits_per_word = BITS,
+  };
 
   int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
   if(ret<0) return error("Error sending SPI message");
   return 0;
 }
 
-int spi_receive(int fd, uint8_t *data){
+/*int spi_receive(int fd, uint8_t *data){             */
+/*  struct spi_ioc_transfer tr = {                    */
+/*    .rx_buf = (unsigned long)data,                  */
+/*    .len = RX_SIZE,                                 */
+/*    .speed_hz = SPEED,                              */
+/*    .bits_per_word = BITS,                          */
+/*  };                                                */
+/*  int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);     */
+/*  if(ret<0) return error("Error receiving message");*/
+/*  return 0;                                         */
+/*}                                                   */
 
-  struct spi_ioc_transfer tr = {
-    .rx_buf = (unsigned long)data,
-		.len = RX_SIZE,
-		.speed_hz = SPEED,
-		.bits_per_word = BITS,
-	};
-
-  int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
-  if(ret<0) return error("Error receiving message");
-  return 0;
-}
-
-int spi_full_duplex(int fd, uint8_t *data, uint8_t *dati, int len){
+/*
+ * Sends a SPI packet and reads the answer.
+ * Parameters: fd: The file descriptor opened with spi_init(),
+ * tx: an array of uint8_t to be transmitted over spi.
+ * rx: a pointer to the array where the response will be
+ * stored. Can only be as long as tx.
+ * len: the lenght of the provided data array.
+ * returns 1 if something went wrong
+ */
+int spi_full_duplex(int fd, uint8_t *tx, uint8_t *rx, int len){
 
     struct spi_ioc_transfer tr = {
-            .tx_buf = (unsigned long)data,
-            .rx_buf = (unsigned long)dati,
-            .len = len,
-            .speed_hz = SPEED,
-            .bits_per_word = BITS,
+      .tx_buf = (unsigned long)tx,
+      .rx_buf = (unsigned long)rx,
+      .len = len,
+      .speed_hz = SPEED,
+      .bits_per_word = BITS,
     };
 
     int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
-    if(ret<0) return error("Error receiving message");
+    if(ret<0) return error("Error during the transmission of the message");
     return 0;
 }
 
+
+/*
+ * Closes the SPI device pointed by the file descriptor.
+ * Remeber to use this!
+ */
 void spi_close(int fd){
   close(fd);
 }
 
-
+/*
+ * Temporary test code
+ */
 int main(){
   int err;
   int fd = spi_init();
 
-	uint8_t data[] = {
-		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-		0x40, 0x00, 0x00, 0x00, 0x00, 0x95,
-		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-		0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
-		0xF0, 0x0D,
-	};
+  uint8_t data[] = {
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0x40, 0x00, 0x00, 0x00, 0x00, 0x95,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
+    0xF0, 0x0D,
+  };
 
   uint8_t *dati = calloc(RX_SIZE,sizeof(uint8_t));
   err = spi_full_duplex(fd, data, dati, RX_SIZE);
