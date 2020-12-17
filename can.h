@@ -3,12 +3,6 @@
 
 #include <stdint.h>
 
-
-typedef unsigned char __u8;
-typedef unsigned short __u16;
-typedef unsigned long __u32;
-
-
 /* special address description flags for the CAN_ID */
 #define CAN_EFF_FLAG 0x80000000UL /* EFF/SFF is set in the MSB */
 #define CAN_RTR_FLAG 0x40000000UL /* remote transmission request */

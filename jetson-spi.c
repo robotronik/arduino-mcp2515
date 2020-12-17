@@ -17,7 +17,7 @@ int spi_init(){
    * Initialisation
    */
 
-  int file_descriptor;
+  spiid file_descriptor;
   int ret;
   const char *device = "/dev/spidev0.0";
   uint8_t bits = BITS;
@@ -61,11 +61,11 @@ int error(char *err){
  * returns 1 if something went wrong
  */
 
-int spi_send(int fd, uint8_t *data, int len){
+int spi_send(spiid fd, spiframe send_data){
 
   struct spi_ioc_transfer tr = {
-    .tx_buf = (unsigned long)data,
-    .len = len,
+    .tx_buf = (unsigned long)send_data.data,
+    .len = send_data.len,
     .speed_hz = SPEED,
     .bits_per_word = BITS,
   };
@@ -96,18 +96,19 @@ int spi_send(int fd, uint8_t *data, int len){
  * len: the lenght of the provided data array.
  * returns 1 if something went wrong
  */
-int spi_full_duplex(int fd, uint8_t *tx, uint8_t *rx, int len){
+int spi_full_duplex(spiid fd, spiframe send_data, spiframe receive_data){
 
     struct spi_ioc_transfer tr = {
-      .tx_buf = (unsigned long)tx,
-      .rx_buf = (unsigned long)rx,
-      .len = len,
+      .tx_buf = (unsigned long)send_data.data,
+      .rx_buf = (unsigned long)send_data.data,
+      .len = send_data.len,
       .speed_hz = SPEED,
       .bits_per_word = BITS,
     };
 
     int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
     if(ret<0) return error("Error during the transmission of the message");
+    receive_data.len = send_data.len;
     return 0;
 }
 
@@ -121,7 +122,7 @@ void spi_close(int fd){
 }
 
 /*
- * Temporary test code
+ * Temporary test code //TODO does not work after spi_full_duplex parameters change
  */
 int main(){
   int err;
