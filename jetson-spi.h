@@ -20,12 +20,10 @@ typedef struct{
  int len;
 } spiframe;
 
-typedef int spiid;
-
 int error(char * err);
 
-spiid spi_init();
-void spi_close(spiid);
-int spi_send(spiid fd, spiframe send_data);
-int spi_full_duplex(spiid fd, spiframe send_data, spiframe receive_data);
+int spi_init();
+void spi_close(int);
+int spi_send(int fd, spiframe send_data);
+int spi_full_duplex(int fd, spiframe send_data, spiframe receive_data);
 int error(char * err);

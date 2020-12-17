@@ -17,7 +17,7 @@ int spi_init(){
    * Initialisation
    */
 
-  spiid file_descriptor;
+  int file_descriptor;
   int ret;
   const char *device = "/dev/spidev0.0";
   uint8_t bits = BITS;
@@ -61,7 +61,7 @@ int error(char *err){
  * returns 1 if something went wrong
  */
 
-int spi_send(spiid fd, spiframe send_data){
+int spi_send(int fd, spiframe send_data){
 
   struct spi_ioc_transfer tr = {
     .tx_buf = (unsigned long)send_data.data,
@@ -96,7 +96,7 @@ int spi_send(spiid fd, spiframe send_data){
  * len: the lenght of the provided data array.
  * returns 1 if something went wrong
  */
-int spi_full_duplex(spiid fd, spiframe send_data, spiframe receive_data){
+int spi_full_duplex(int fd, spiframe send_data, spiframe receive_data){
 
     struct spi_ioc_transfer tr = {
       .tx_buf = (unsigned long)send_data.data,
