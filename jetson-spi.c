@@ -66,26 +66,16 @@ int spi_send(int fd, spiframe send_data){
   struct spi_ioc_transfer tr = {
     .tx_buf = (unsigned long)send_data.data,
     .len = send_data.len,
+    .cs_change = 1,
     .speed_hz = SPEED,
     .bits_per_word = BITS,
   };
 
   int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
   if(ret<0) return error("Error sending SPI message");
+  free(send_data.data);
   return 0;
 }
-
-/*int spi_receive(int fd, uint8_t *data){             */
-/*  struct spi_ioc_transfer tr = {                    */
-/*    .rx_buf = (unsigned long)data,                  */
-/*    .len = RX_SIZE,                                 */
-/*    .speed_hz = SPEED,                              */
-/*    .bits_per_word = BITS,                          */
-/*  };                                                */
-/*  int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);     */
-/*  if(ret<0) return error("Error receiving message");*/
-/*  return 0;                                         */
-/*}                                                   */
 
 /*
  * Sends a SPI packet and reads the answer.
@@ -100,15 +90,17 @@ int spi_full_duplex(int fd, spiframe send_data, spiframe receive_data){
 
     struct spi_ioc_transfer tr = {
       .tx_buf = (unsigned long)send_data.data,
-      .rx_buf = (unsigned long)send_data.data,
+      .rx_buf = (unsigned long)receive_data.data,
       .len = send_data.len,
       .speed_hz = SPEED,
+      .cs_change = 1,
       .bits_per_word = BITS,
     };
 
     int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
     if(ret<0) return error("Error during the transmission of the message");
     receive_data.len = send_data.len;
+    free(send_data.data);
     return 0;
 }
 
@@ -119,6 +111,14 @@ int spi_full_duplex(int fd, spiframe send_data, spiframe receive_data){
  */
 void spi_close(int fd){
   close(fd);
+}
+
+spiframe spi_make_frame_1(uint8_t data){
+  spiframe frame;
+  frame.data = malloc(sizeof(uint8_t));
+  frame.len = 1;
+  frame.data[0] = data;
+  return frame;
 }
 
 /*
@@ -149,3 +149,4 @@ int main(){
   spi_close(fd);
   return 0;
 }
+

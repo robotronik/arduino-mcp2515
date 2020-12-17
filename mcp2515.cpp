@@ -1,4 +1,3 @@
-#include "Arduino.h"
 #include "mcp2515.h"
 
 const struct MCP2515::TXBn_REGS MCP2515::TXB[MCP2515::N_TXBUFFERS] = {
@@ -14,30 +13,15 @@ const struct MCP2515::RXBn_REGS MCP2515::RXB[N_RXBUFFERS] = {
 
 MCP2515::MCP2515(const uint8_t _CS)
 {
-    SPI.begin();
-
-    SPICS = _CS;
-    pinMode(SPICS, OUTPUT);
-    endSPI();
+  file_descriptor = spi_init();
 }
 
-void MCP2515::startSPI() {
-    SPI.beginTransaction(SPISettings(SPI_CLOCK, MSBFIRST, SPI_MODE0));
-    digitalWrite(SPICS, LOW);
-}
-
-void MCP2515::endSPI() {
-    digitalWrite(SPICS, HIGH);
-    SPI.endTransaction();
-}
 
 MCP2515::ERROR MCP2515::reset(void)
 {
-    startSPI();
-    SPI.transfer(INSTRUCTION_RESET);
-    endSPI();
+    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_RESET));
 
-    delay(10);
+    usleep(10000);
 
     uint8_t zeros[14];
     memset(zeros, 0, sizeof(zeros));
@@ -84,63 +68,53 @@ MCP2515::ERROR MCP2515::reset(void)
 
 uint8_t MCP2515::readRegister(const REGISTER reg)
 {
-    startSPI();
-    SPI.transfer(INSTRUCTION_READ);
-    SPI.transfer(reg);
-    uint8_t ret = SPI.transfer(0x00);
-    endSPI();
+    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_READ));
+    spi_send(file_descriptor,spi_make_frame_1(reg));
+    spiframe ret;
+    ret.data = calloc(2, sizeof(ret.data));
+    spi_full_duplex(file_descriptor,spi_make_frame_1(0x00), ret);
 
     return ret;
 }
 
 void MCP2515::readRegisters(const REGISTER reg, uint8_t values[], const uint8_t n)
 {
-    startSPI();
-    SPI.transfer(INSTRUCTION_READ);
-    SPI.transfer(reg);
+    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_READ));
+    spi_send(file_descriptor,spi_make_frame_1(reg));
     // mcp2515 has auto-increment of address-pointer
     for (uint8_t i=0; i<n; i++) {
         values[i] = SPI.transfer(0x00);
     }
-    endSPI();
 }
 
 void MCP2515::setRegister(const REGISTER reg, const uint8_t value)
 {
-    startSPI();
-    SPI.transfer(INSTRUCTION_WRITE);
-    SPI.transfer(reg);
-    SPI.transfer(value);
-    endSPI();
+    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_WRITE));
+    spi_send(file_descriptor,spi_make_frame_1(reg));
+    spi_send(file_descriptor,spi_make_frame_1(value));
 }
 
 void MCP2515::setRegisters(const REGISTER reg, const uint8_t values[], const uint8_t n)
 {
-    startSPI();
-    SPI.transfer(INSTRUCTION_WRITE);
-    SPI.transfer(reg);
+    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_WRITE));
+    spi_send(file_descriptor,spi_make_frame_1(reg));
     for (uint8_t i=0; i<n; i++) {
-        SPI.transfer(values[i]);
+        spi_send(file_descriptor,spi_make_frame_1(values[i]));
     }
-    endSPI();
 }
 
 void MCP2515::modifyRegister(const REGISTER reg, const uint8_t mask, const uint8_t data)
 {
-    startSPI();
-    SPI.transfer(INSTRUCTION_BITMOD);
-    SPI.transfer(reg);
-    SPI.transfer(mask);
-    SPI.transfer(data);
-    endSPI();
+    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_BITMOD));
+    spi_send(file_descriptor,spi_make_frame_1(reg));
+    spi_send(file_descriptor,spi_make_frame_1(mask));
+    spi_send(file_descriptor,spi_make_frame_1(data));
 }
 
 uint8_t MCP2515::getStatus(void)
 {
-    startSPI();
-    SPI.transfer(INSTRUCTION_READ_STATUS);
+    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_READ_STATUS));
     uint8_t i = SPI.transfer(0x00);
-    endSPI();
 
     return i;
 }

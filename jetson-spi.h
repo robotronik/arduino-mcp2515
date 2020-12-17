@@ -23,6 +23,7 @@ typedef struct{
 int error(char * err);
 
 int spi_init();
+spiframe spi_make_frame_1(uint8_t);
 void spi_close(int);
 int spi_send(int fd, spiframe send_data);
 int spi_full_duplex(int fd, spiframe send_data, spiframe receive_data);

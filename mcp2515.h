@@ -1,8 +1,10 @@
 #ifndef _MCP2515_H_
 #define _MCP2515_H_
 
-#include <SPI.h>
 #include "can.h"
+#include <time.h>
+#include "string.h"
+#include "jetson-spi.h"
 
 /*
  *  Speed 8M
@@ -267,6 +269,7 @@ class MCP2515
         static const uint8_t CANCTRL_OSM = 0x08;
         static const uint8_t CANCTRL_CLKEN = 0x04;
         static const uint8_t CANCTRL_CLKPRE = 0x03;
+        static int file_descriptor;
 
         enum /*class*/ CANCTRL_REQOP_MODE : uint8_t {
             CANCTRL_REQOP_NORMAL     = 0x00,

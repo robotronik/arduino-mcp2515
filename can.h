@@ -2,6 +2,7 @@
 #define CAN_H_
 
 #include <stdint.h>
+#include <linux/spi/spidev.h>
 
 /* special address description flags for the CAN_ID */
 #define CAN_EFF_FLAG 0x80000000UL /* EFF/SFF is set in the MSB */
