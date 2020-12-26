@@ -68,13 +68,14 @@ MCP2515::ERROR MCP2515::reset(void)
 
 uint8_t MCP2515::readRegister(const REGISTER reg)
 {
-    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_READ));
-    spi_send(file_descriptor,spi_make_frame_1(reg));
-    spiframe ret;
-    ret.data = calloc(2, sizeof(ret.data));
-    spi_full_duplex(file_descriptor,spi_make_frame_1(0x00), ret);
-
-    return ret;
+    static const int len = 3;
+    int point = 0;
+    spiframe ret = spi_make_void_frame(len);
+    spiframe frame = spi_make_void_frame(len);
+    append_single_data(frame.data, &point, INSTRUCTION_READ);
+    append_single_data(frame.data, &point, reg);
+    spi_full_duplex(file_descriptor, frame, ret);
+    return ret.data;
 }
 
 void MCP2515::readRegisters(const REGISTER reg, uint8_t values[], const uint8_t n)

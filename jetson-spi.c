@@ -99,7 +99,6 @@ int spi_full_duplex(int fd, spiframe send_data, spiframe receive_data){
 
     int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
     if(ret<0) return error("Error during the transmission of the message");
-    receive_data.len = send_data.len;
     free(send_data.data);
     return 0;
 }
@@ -113,12 +112,32 @@ void spi_close(int fd){
   close(fd);
 }
 
-spiframe spi_make_frame_1(uint8_t data){
+spiframe spi_make_frame(uint8_t* data, int len){
   spiframe frame;
-  frame.data = malloc(sizeof(uint8_t));
-  frame.len = 1;
-  frame.data[0] = data;
+  frame.len = len;
+  frame.data = data;
   return frame;
+}
+
+spiframe spi_make_void_frame(int len){
+    uint8_t* data;
+    data = (uint8_t*)calloc(len, sizeof(*data));
+    memset(data, 0, len * sizeof(*data));
+    spiframe frame = spi_make_frame(data, int len);
+    return frame;
+}
+
+void append_data(uint8_t* data, int* point, uint8_t* add, int addlen){
+    const int addend = *point+addlen;
+    while(*point<addend){
+        data[i] = add[i];
+        *point++;
+    }
+}
+
+void append_single_data(uint8_t* data, int* point, uint8_t add){
+    data[*point] = add[*point];
+    *point++;
 }
 
 /*

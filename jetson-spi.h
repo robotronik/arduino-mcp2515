@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
 
@@ -23,7 +24,10 @@ typedef struct{
 int error(char * err);
 
 int spi_init();
-spiframe spi_make_frame_1(uint8_t);
+spiframe spi_make_frame(uint8_t* data, int len);
+spiframe spi_make_void_frame(int len);
+void append_data(uint8_t* data, int* point, uint8_t* add, int addlen);
+void append_single_data(uint8_t* data, int* point, uint8_t add);
 void spi_close(int);
 int spi_send(int fd, spiframe send_data);
 int spi_full_duplex(int fd, spiframe send_data, spiframe receive_data);
