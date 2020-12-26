@@ -19,7 +19,9 @@ MCP2515::MCP2515(const uint8_t _CS)
 
 MCP2515::ERROR MCP2515::reset(void)
 {
-    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_RESET));
+    spiframe frame = spi_make_void_frame(1);
+    frame.data[0] = INSTRUCTION_RESET;
+    spi_send(file_descriptor, frame);
 
     usleep(10000);
 
