@@ -68,56 +68,67 @@ MCP2515::ERROR MCP2515::reset(void)
 
 uint8_t MCP2515::readRegister(const REGISTER reg)
 {
-    static const int len = 3;
+    static const int n = FRAME_BASE_SIZE+1;
     int point = 0;
-    spiframe ret = spi_make_void_frame(len);
-    spiframe frame = spi_make_void_frame(len);
+    spiframe ret = spi_make_void_frame(n);
+    spiframe frame = spi_make_void_frame(n);
     append_single_data(frame.data, &point, INSTRUCTION_READ);
     append_single_data(frame.data, &point, reg);
     spi_full_duplex(file_descriptor, frame, ret);
-    return ret.data;
+    return *ret.data;
 }
 
-void MCP2515::readRegisters(const REGISTER reg, uint8_t values[], const uint8_t n)
+void MCP2515::readRegisters(const REGISTER reg, uint8_t values[], uint8_t n)
 {
-    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_READ));
-    spi_send(file_descriptor,spi_make_frame_1(reg));
+    n += FRAME_BASE_SIZE;
+    int point = 0;
+    spiframe ret = spi_make_frame(values, n);
+    spiframe frame = spi_make_void_frame(n);
+    append_single_data(frame.data, &point, INSTRUCTION_READ);
+    append_single_data(frame.data, &point, reg);
     // mcp2515 has auto-increment of address-pointer
-    for (uint8_t i=0; i<n; i++) {
-        values[i] = SPI.transfer(0x00);
-    }
+    spi_full_duplex(file_descriptor, frame, ret);
 }
 
 void MCP2515::setRegister(const REGISTER reg, const uint8_t value)
 {
-    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_WRITE));
-    spi_send(file_descriptor,spi_make_frame_1(reg));
-    spi_send(file_descriptor,spi_make_frame_1(value));
+    int point = 0;
+    spiframe frame = spi_make_void_frame(FRAME_BASE_SIZE+1);
+    append_single_data(frame.data, &point, INSTRUCTION_WRITE);
+    append_single_data(frame.data, &point, reg);
+    append_single_data(frame.data, &point, value);
+    spi_send(file_descriptor, frame);
 }
 
 void MCP2515::setRegisters(const REGISTER reg, const uint8_t values[], const uint8_t n)
 {
-    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_WRITE));
-    spi_send(file_descriptor,spi_make_frame_1(reg));
-    for (uint8_t i=0; i<n; i++) {
-        spi_send(file_descriptor,spi_make_frame_1(values[i]));
-    }
+    int point = 0;
+    spiframe frame = spi_make_void_frame(FRAME_BASE_SIZE+n);
+    append_single_data(frame.data, &point, INSTRUCTION_WRITE);
+    append_single_data(frame.data, &point, reg);
+    append_data(frame.data, &point, values, n);
+    spi_send(file_descriptor, frame);
 }
 
 void MCP2515::modifyRegister(const REGISTER reg, const uint8_t mask, const uint8_t data)
 {
-    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_BITMOD));
-    spi_send(file_descriptor,spi_make_frame_1(reg));
-    spi_send(file_descriptor,spi_make_frame_1(mask));
-    spi_send(file_descriptor,spi_make_frame_1(data));
+    int point = 0;
+    spiframe frame = spi_make_void_frame(FRAME_BASE_SIZE+2);
+    append_single_data(frame.data, &point, INSTRUCTION_BITMOD);
+    append_single_data(frame.data, &point, reg);
+    append_single_data(frame.data, &point, mask);
+    append_single_data(frame.data, &point, data);
+    spi_send(file_descriptor, frame);
 }
 
 uint8_t MCP2515::getStatus(void)
 {
-    spi_send(file_descriptor,spi_make_frame_1(INSTRUCTION_READ_STATUS));
-    uint8_t i = SPI.transfer(0x00);
-
-    return i;
+    static const int n = FRAME_BASE_SIZE;
+    spiframe ret = spi_make_void_frame(n);
+    spiframe frame = spi_make_void_frame(n);
+    frame.data[0] = INSTRUCTION_READ_STATUS;
+    spi_full_duplex(file_descriptor, frame, ret);
+    return *ret.data;
 }
 
 MCP2515::ERROR MCP2515::setConfigMode()

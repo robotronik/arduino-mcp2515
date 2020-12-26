@@ -171,6 +171,8 @@
 #define MCP_20MHz_33k3BPS_CFG2 (0xFF)
 #define MCP_20MHz_33k3BPS_CFG3 (0x87)
 
+#define FRAME_BASE_SIZE 2
+
 enum CAN_CLOCK {
     MCP_20MHZ,
     MCP_16MHZ,
@@ -455,7 +457,7 @@ class MCP2515
         ERROR setMode(const CANCTRL_REQOP_MODE mode);
 
         uint8_t readRegister(const REGISTER reg);
-        void readRegisters(const REGISTER reg, uint8_t values[], const uint8_t n);
+        void readRegisters(const REGISTER reg, uint8_t values[], uint8_t n);
         void setRegister(const REGISTER reg, const uint8_t value);
         void setRegisters(const REGISTER reg, const uint8_t values[], const uint8_t n);
         void modifyRegister(const REGISTER reg, const uint8_t mask, const uint8_t data);

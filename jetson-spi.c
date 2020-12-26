@@ -48,7 +48,7 @@ int spi_init(){
   return file_descriptor;
 }
 
-int error(char *err){
+int error(const char *err){
   printf("%s",err);
   return 1;
 }
@@ -61,7 +61,7 @@ int error(char *err){
  * returns 1 if something went wrong
  */
 
-int spi_send(int fd, spiframe send_data){
+int spi_send(const int fd, spiframe send_data){
 
   struct spi_ioc_transfer tr = {
     .tx_buf = (unsigned long)send_data.data,
@@ -86,7 +86,7 @@ int spi_send(int fd, spiframe send_data){
  * len: the lenght of the provided data array.
  * returns 1 if something went wrong
  */
-int spi_full_duplex(int fd, spiframe send_data, spiframe receive_data){
+int spi_full_duplex(const int fd, spiframe send_data, spiframe receive_data){
 
     struct spi_ioc_transfer tr = {
       .tx_buf = (unsigned long)send_data.data,
@@ -112,14 +112,14 @@ void spi_close(int fd){
   close(fd);
 }
 
-spiframe spi_make_frame(uint8_t* data, int len){
+spiframe spi_make_frame(uint8_t* data, const int len){
   spiframe frame;
   frame.len = len;
   frame.data = data;
   return frame;
 }
 
-spiframe spi_make_void_frame(int len){
+spiframe spi_make_void_frame(const int len){
     uint8_t* data;
     data = (uint8_t*)calloc(len, sizeof(*data));
     memset(data, 0, len * sizeof(*data));
@@ -127,7 +127,7 @@ spiframe spi_make_void_frame(int len){
     return frame;
 }
 
-void append_data(uint8_t* data, int* point, uint8_t* add, int addlen){
+void append_data(uint8_t* data, int* point, const uint8_t* add, const int addlen){
     const int addend = *point+addlen;
     while(*point<addend){
         data[i] = add[i];
@@ -135,7 +135,7 @@ void append_data(uint8_t* data, int* point, uint8_t* add, int addlen){
     }
 }
 
-void append_single_data(uint8_t* data, int* point, uint8_t add){
+void append_single_data(uint8_t* data, int* point, const uint8_t add){
     data[*point] = add[*point];
     *point++;
 }
