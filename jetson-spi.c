@@ -123,49 +123,49 @@ spiframe spi_make_void_frame(const int len){
     uint8_t* data;
     data = (uint8_t*)calloc(len, sizeof(*data));
     memset(data, 0, len * sizeof(*data));
-    spiframe frame = spi_make_frame(data, int len);
+    spiframe frame = spi_make_frame(data, len);
     return frame;
 }
 
 void append_data(uint8_t* data, int* point, const uint8_t* add, const int addlen){
     const int addend = *point+addlen;
     while(*point<addend){
-        data[i] = add[i];
-        *point++;
+        data[*point] = add[*point];
+        (*point)++;
     }
 }
 
 void append_single_data(uint8_t* data, int* point, const uint8_t add){
-    data[*point] = add[*point];
-    *point++;
+    data[*point] = add;
+    (*point)++;
 }
 
 /*
  * Temporary test code //TODO does not work after spi_full_duplex parameters change
  */
-int main(){
-  int err;
-  int fd = spi_init();
+/*int main(){*/
+  /*int err;*/
+  /*int fd = spi_init();*/
 
-  uint8_t data[] = {
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-    0x40, 0x00, 0x00, 0x00, 0x00, 0x95,
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-    0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
-    0xF0, 0x0D,
-  };
+  /*uint8_t data[] = {*/
+    /*0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,*/
+    /*0x40, 0x00, 0x00, 0x00, 0x00, 0x95,*/
+    /*0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,*/
+    /*0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,*/
+    /*0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,*/
+    /*0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,*/
+    /*0xF0, 0x0D,*/
+  /*};*/
 
-  uint8_t *dati = calloc(RX_SIZE,sizeof(uint8_t));
-  err = spi_full_duplex(fd, data, dati, RX_SIZE);
-  if(err==1) printf("spi receive error");
-  for(int i=0;i<(int)RX_SIZE;i++){
-    printf("%.2X ",dati[i]);
-  }
-  printf("\n");
-  free(dati);
-  spi_close(fd);
-  return 0;
-}
+  /*uint8_t *dati = calloc(RX_SIZE,sizeof(uint8_t));*/
+  /*err = spi_full_duplex(fd, data, dati);*/
+  /*if(err==1) printf("spi receive error");*/
+  /*for(int i=0;i<(int)RX_SIZE;i++){*/
+    /*printf("%.2X ",dati[i]);*/
+  /*}*/
+  /*printf("\n");*/
+  /*free(dati);*/
+  /*spi_close(fd);*/
+  /*return 0;*/
+/*}*/
 

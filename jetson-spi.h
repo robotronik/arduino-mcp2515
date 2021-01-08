@@ -21,7 +21,6 @@ typedef struct{
  int len;
 } spiframe;
 
-int error(char * err);
 
 int spi_init();
 spiframe spi_make_frame(uint8_t* data, const int len);
