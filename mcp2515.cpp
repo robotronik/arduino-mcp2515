@@ -162,17 +162,18 @@ MCP2515::ERROR MCP2515::setMode(const CANCTRL_REQOP_MODE mode)
 {
     modifyRegister(MCP_CANCTRL, CANCTRL_REQOP, mode);
 
-    unsigned long endTime = millis() + 10;
+    int i = 0;
     bool modeMatch = false;
-    while (millis() < endTime) {
-        uint8_t newmode = readRegister(MCP_CANSTAT);
-        newmode &= CANSTAT_OPMOD;
+    while (i < 100000) {
+      i++;
+      uint8_t newmode = readRegister(MCP_CANSTAT);
+      newmode &= CANSTAT_OPMOD;
 
-        modeMatch = newmode == mode;
+      modeMatch = newmode == mode;
 
-        if (modeMatch) {
-            break;
-        }
+      if (modeMatch) {
+          break;
+      }
     }
 
     return modeMatch ? ERROR_OK : ERROR_FAIL;
@@ -337,7 +338,7 @@ MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed, CAN_CLOCK canClock)
             cfg1 = MCP_16MHz_83k3BPS_CFG1;
             cfg2 = MCP_16MHz_83k3BPS_CFG2;
             cfg3 = MCP_16MHz_83k3BPS_CFG3;
-            break; 
+            break;
 
             case (CAN_100KBPS):                                             // 100Kbps
             cfg1 = MCP_16MHz_100kBPS_CFG1;
@@ -388,7 +389,7 @@ MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed, CAN_CLOCK canClock)
             cfg1 = MCP_20MHz_33k3BPS_CFG1;
             cfg2 = MCP_20MHz_33k3BPS_CFG2;
             cfg3 = MCP_20MHz_33k3BPS_CFG3;
-	    break;
+      break;
 
             case (CAN_40KBPS):                                              //  40Kbps
             cfg1 = MCP_20MHz_40kBPS_CFG1;
@@ -412,7 +413,7 @@ MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed, CAN_CLOCK canClock)
             cfg1 = MCP_20MHz_83k3BPS_CFG1;
             cfg2 = MCP_20MHz_83k3BPS_CFG2;
             cfg3 = MCP_20MHz_83k3BPS_CFG3;
-	    break;
+            break;
 
             case (CAN_100KBPS):                                             // 100Kbps
             cfg1 = MCP_20MHz_100kBPS_CFG1;
@@ -475,11 +476,11 @@ MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed, CAN_CLOCK canClock)
 MCP2515::ERROR MCP2515::setClkOut(const CAN_CLKOUT divisor)
 {
     if (divisor == CLKOUT_DISABLE) {
-	/* Turn off CLKEN */
-	modifyRegister(MCP_CANCTRL, CANCTRL_CLKEN, 0x00);
+  /* Turn off CLKEN */
+  modifyRegister(MCP_CANCTRL, CANCTRL_CLKEN, 0x00);
 
-	/* Turn on CLKOUT for SOF */
-	modifyRegister(MCP_CNF3, CNF3_SOF, CNF3_SOF);
+  /* Turn on CLKOUT for SOF */
+  modifyRegister(MCP_CNF3, CNF3_SOF, CNF3_SOF);
         return ERROR_OK;
     }
 
@@ -520,7 +521,7 @@ MCP2515::ERROR MCP2515::setFilterMask(const MASK mask, const bool ext, const uin
     if (res != ERROR_OK) {
         return res;
     }
-    
+
     uint8_t tbufdata[4];
     prepareId(tbufdata, ext, ulData);
 
@@ -533,7 +534,7 @@ MCP2515::ERROR MCP2515::setFilterMask(const MASK mask, const bool ext, const uin
     }
 
     setRegisters(reg, tbufdata, 4);
-    
+
     return ERROR_OK;
 }
 
@@ -695,7 +696,7 @@ uint8_t MCP2515::getErrorFlags(void)
 
 void MCP2515::clearRXnOVRFlags(void)
 {
-	modifyRegister(MCP_EFLG, EFLG_RX0OVR | EFLG_RX1OVR, 0);
+  modifyRegister(MCP_EFLG, EFLG_RX0OVR | EFLG_RX1OVR, 0);
 }
 
 uint8_t MCP2515::getInterrupts(void)
@@ -720,20 +721,20 @@ void MCP2515::clearTXInterrupts(void)
 
 void MCP2515::clearRXnOVR(void)
 {
-	uint8_t eflg = getErrorFlags();
-	if (eflg != 0) {
-		clearRXnOVRFlags();
-		clearInterrupts();
-		//modifyRegister(MCP_CANINTF, CANINTF_ERRIF, 0);
-	}
-	
+  uint8_t eflg = getErrorFlags();
+  if (eflg != 0) {
+    clearRXnOVRFlags();
+    clearInterrupts();
+    //modifyRegister(MCP_CANINTF, CANINTF_ERRIF, 0);
+  }
+
 }
 
 void MCP2515::clearMERR()
 {
-	//modifyRegister(MCP_EFLG, EFLG_RX0OVR | EFLG_RX1OVR, 0);
-	//clearInterrupts();
-	modifyRegister(MCP_CANINTF, CANINTF_MERRF, 0);
+  //modifyRegister(MCP_EFLG, EFLG_RX0OVR | EFLG_RX1OVR, 0);
+  //clearInterrupts();
+  modifyRegister(MCP_CANINTF, CANINTF_MERRF, 0);
 }
 
 void MCP2515::clearERRIF()
