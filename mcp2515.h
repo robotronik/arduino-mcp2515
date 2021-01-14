@@ -271,7 +271,7 @@ class MCP2515
         static const uint8_t CANCTRL_OSM = 0x08;
         static const uint8_t CANCTRL_CLKEN = 0x04;
         static const uint8_t CANCTRL_CLKPRE = 0x03;
-        static int file_descriptor;
+        int file_descriptor;
 
         enum /*class*/ CANCTRL_REQOP_MODE : uint8_t {
             CANCTRL_REQOP_NORMAL     = 0x00,
@@ -465,7 +465,7 @@ class MCP2515
         void prepareId(uint8_t *buffer, const bool ext, const uint32_t id);
     
     public:
-        MCP2515(const uint8_t _CS);
+        MCP2515();
         ERROR reset(void);
         ERROR setConfigMode();
         ERROR setListenOnlyMode();

@@ -66,9 +66,9 @@ int spi_send(const int fd, spiframe send_data){
   struct spi_ioc_transfer tr = {
     .tx_buf = (unsigned long)send_data.data,
     .len = send_data.len,
-    .cs_change = 1,
     .speed_hz = SPEED,
     .bits_per_word = BITS,
+    .cs_change = 1,
   };
 
   int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
@@ -93,8 +93,8 @@ int spi_full_duplex(const int fd, spiframe send_data, spiframe receive_data){
       .rx_buf = (unsigned long)receive_data.data,
       .len = send_data.len,
       .speed_hz = SPEED,
-      .cs_change = 1,
       .bits_per_word = BITS,
+      .cs_change = 1,
     };
 
     int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
