@@ -4,7 +4,9 @@
 #include "can.h"
 #include <time.h>
 #include "string.h"
-#include "jetson-spi.h"
+extern "C" {
+    #include "jetson-spi.h"
+}
 
 /*
  *  Speed 8M
